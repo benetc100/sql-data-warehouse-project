@@ -1,0 +1,37 @@
+/*
+========================================
+Create the Dataware house 
+========================================
+Create a the inital data warehouse and then create the Schemas for each of the levels.
+If the database exists, it will be dropped and recreated. 
+*/
+
+USE master;
+GO
+
+--DROP AND RECREATE THE DWH 
+
+IF EXISTS (SELECT 1 FROM SYS.DATABASES WHERE NAME = 'DWH_BE')
+BEGIN
+	ALTER DATABASE DWH_BE SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+	DROP DATABASE DWH_BE
+END;
+GO
+
+--CREATE THE DATAWARHOUSE 
+
+CREATE DATABASE DWH_BE
+GO
+
+USE DWH_BE;
+
+--CREATE SCHEMAS FOR DIFFERENT LEVELS OF THE DATA 
+
+CREATE SCHEMA BRONZE;
+GO
+
+CREATE SCHEMA SILVER;
+GO
+
+CREATE SCHEMA GOLD;
+GO
