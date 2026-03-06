@@ -1,0 +1,45 @@
+  /*
+ ===========================================
+Create the Gold Layer
+ ===========================================
+ */
+ /*
+ This is the inital transformation and load into the SILVER layer table 
+ All tables are transformed and amended as to create a simple fromat for the data to be moved to the GOLD level
+
+ */
+CREATE VIEW GOLD.dim_products AS 
+SELECT 
+ROW_NUMBER() OVER(ORDER BY pn.prd_start_dt, pn.prd_key) AS product_key,
+pn.prd_id AS product_id,
+pn.prd_key AS product_number,
+pn.prd_nm AS product_name,
+pn.cat_id AS category_id,
+pc.CAT AS category,
+pc.SUBCAT AS subcategory,
+pc.MAINTENANCE AS maintenance,
+pn.prd_cost AS cost,
+pn.prd_line AS product_line,
+pn.prd_start_dt
+FROM SILVER.crm_prd_info pn
+LEFT JOIN SILVER.erp_px_cat_g1v2 pc on pn.cat_id = pc.ID
+WHERE pn.prd_end_dt IS NULL
+
+
+
+--
+CREATE VIEW GOLD.dim_customers as
+SELECT  ROW_NUMBER() OVER(ORDER BY cst_id) AS customer_key
+	  ,ci.[cst_id] AS customer_id
+      ,ci.[cst_key] AS customer_number
+      ,ci.[cst_firstname] AS first_name
+      ,ci.[cst_lastname] AS last_name
+      ,ci.[cst_marital_status] AS martiual_status
+	  ,CASE WHEN ci.cst_gndr != 'n/a' THEN ci.cst_gndr 
+			ELSE COALESCE(ca.gen, 'n/a')
+		END AS new_gen
+	  ,ca.BDATE AS birthdate
+	  ,la.CNTRY AS country
+  FROM [DWH_BE].[SILVER].[crm_cust_info] ci
+  LEFT JOIN SILVER.erp_cust_az12 ca on ci.cst_key = ca.CID
+  LEFT JOIN SILVER.erp_loc_a101 la on ci.cst_key = la.CID
